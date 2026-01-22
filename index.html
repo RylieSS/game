@@ -671,7 +671,7 @@
         <div class="powerUp" id="pu-shield" data-powerup="shield"><span class="icon">🛡</span>Shield</div>
         <div class="powerUp" id="pu-plus10" data-powerup="plus10"><span class="icon">⏱</span>+10s</div>
         <div class="powerUp" id="pu-refresh" data-powerup="refresh"><span class="icon">🔄</span>Refresh</div>
-        <div class="powerUp" id="pu-double" data-powerup="double"><span class="icon">✨</span>2× Points</div>
+        <div class="powerUp" id="pu-double" data-powerup="double"><span class="icon">✨</span>2x Points</div>
     </div>
 
     <div id="levelEndPopup">
@@ -1254,85 +1254,8 @@
                 };
             });
 
-
             setPowerUpsVisibility(false);
-
-
-            let watchdog = setInterval(() => {
-                try {
-                    const popupVisible = popup && popup.style && popup.style.display !== "none";
-                    if (levelInProgress && !popupVisible && !timer) {
-                        console.warn("Watchdog: recovering from stuck state");
-                        levelInProgress = false;
-
-                        if (typeof time !== "number" || time <= 0) time = (baseTimes[difficulty] || 15);
-                        startTimer();
-
-                        try { showDebugOverlay('Game Fixed'); } catch (e) { console.warn('Watchdog overlay error', e); }
-                        try { showRecoverButton('Recovered'); } catch (e) { }
-                    }
-                } catch (e) {
-                    console.error("Watchdog error:", e);
-                }
-            }, 1000);
-
-
-            const debugOverlay = document.createElement('div');
-            debugOverlay.id = 'debugOverlay';
-            debugOverlay.style.position = 'fixed';
-            debugOverlay.style.right = '12px';
-            debugOverlay.style.top = '12px';
-            debugOverlay.style.zIndex = '9999';
-            debugOverlay.style.background = 'rgba(0,0,0,0.7)';
-            debugOverlay.style.color = '#fff';
-            debugOverlay.style.padding = '10px 12px';
-            debugOverlay.style.borderRadius = '8px';
-            debugOverlay.style.display = 'none';
-            debugOverlay.style.fontSize = '13px';
-            debugOverlay.innerHTML = '<div id="debugMsg">Error</div><div style="margin-top:8px;text-align:right"><button id="dbgClose" style="background:#ccc;border:none;padding:6px 8px;border-radius:6px;cursor:pointer">Close</button></div>';
-            document.body.appendChild(debugOverlay);
-            const dbgClose = document.getElementById('dbgClose');
-            const debugMsg = document.getElementById('debugMsg');
-            function showDebugOverlay(msg) { debugMsg.textContent = msg || 'Debug'; debugOverlay.style.display = 'block'; hideRecoverButton(); }
-            function hideDebugOverlay() { debugOverlay.style.display = 'none'; }
-            dbgClose && dbgClose.addEventListener('click', hideDebugOverlay);
-            dbgRecover && dbgRecover.addEventListener('click', () => { try { levelInProgress = false; if (!timer) { if (typeof time !== 'number' || time <= 0) time = 15; startTimer(); } hideDebugOverlay(); console.warn('User triggered recovery'); } catch (e) { console.error(e); } });
-
-            window.addEventListener('error', (ev) => {
-                console.error('Uncaught error:', ev.error || ev.message, ev);
-                showDebugOverlay('Uncaught error:\n' + (ev.error && ev.error.message ? ev.error.message : ev.message || ev.error));
-            });
-            window.addEventListener('unhandledrejection', (ev) => {
-                console.error('Unhandled rejection:', ev.reason);
-                showDebugOverlay('Unhandled rejection:\n' + (ev.reason && ev.reason.message ? ev.reason.message : String(ev.reason)));
-            });
-
-            const recoverBtn = get('recoverBtn');
-            function showRecoverButton(msg) {
-                try {
-                    if (recoverBtn) {
-                        recoverBtn.textContent = msg ? 'Recover' : 'Recover';
-                        recoverBtn.style.display = 'block';
-                        setTimeout(() => { if (recoverBtn) recoverBtn.style.display = 'none'; }, 8000);
-                    }
-                } catch (e) { console.error(e) }
-            }
-            function hideRecoverButton() { if (recoverBtn) recoverBtn.style.display = 'none'; }
-            if (recoverBtn) recoverBtn.addEventListener('click', () => { try { levelInProgress = false; if (!timer) { if (typeof time !== 'number' || time <= 0) time = 15; startTimer(); } hideDebugOverlay(); hideRecoverButton(); console.warn('User clicked Recover'); } catch (e) { console.error(e); } });
-
-            window.__game_debug = {
-                getState: () => ({ level, score, time, levelInProgress, doubleActive, shieldActive, lastPowerUpScore })
-            };
-            if ('serviceWorker' in navigator) {
-                try {
-                    navigator.serviceWorker.register('./sw.js').then(reg => {
-                        console.log('ServiceWorker registered', reg.scope);
-                    }).catch(err => console.warn('SW register failed', err));
-                } catch (e) { console.warn('SW registration error', e) }
-            }
         })();
     </script>
-
 </body>
-
 </html>
