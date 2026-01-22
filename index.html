@@ -113,6 +113,8 @@
             align-items: center;
             z-index: 20;
             backdrop-filter: blur(8px);
+            opacity: 1;
+            transition: opacity 0.25s ease-in-out;
         }
 
         .settingsContent {
@@ -157,11 +159,12 @@
             font-size: 1rem;
             border-radius: 8px;
             color: #fff;
-            background: #3498db;
+            background: #db3434;
         }
 
         #closeSettings:hover {
-            background: #2c80ba;
+            background: #ba2c2c;
+            transform: scale(1.03);
         }
 
         #diffPopup {
@@ -643,7 +646,7 @@
         <div class="settingsContent">
             <h2>Settings</h2>
             <div id="settingsButtons">
-                <button id="bgMusicToggle">BGM: ON</button>
+                <button id="bgMusicToggle">Background: ON</button>
                 <button id="feedbackBtn">Feedback</button>
                 <button id="quitBtn">Quit</button>
             </div>
@@ -726,10 +729,6 @@
             let doubleActive = false, shieldActive = false, shieldCooldown = false, levelInProgress = false;
             let lastPowerUpScore = 0;
 
-
-            const popupIntervals = { easy: 10, medium: 10, hard: 10 };
-            const levelEndIntervals = { easy: 10, medium: 10, hard: 10 };
-
             const levelCaps = { easy: 10, medium: 10, hard: 10 };
 
 
@@ -772,11 +771,11 @@
                         break;
                     case "hard": op = ops[rand(0, 3)];
                         if (op === "+" || op === "-") {
-                            if (op === "+") { a = rand(100, 999); b = rand(100, 999); ans = a + b; }
+                            if (op === "+") { a = rand(100, 999); b = rand(10, 99); ans = a + b; }
                             else { a = rand(101, 999); b = rand(100, a - 1); ans = a - b; }
                         }
-                        else if (op === "*") { a = rand(10, 99); b = rand(10, 99); ans = a * b; }
-                        else { b = rand(10, 99); ans = rand(2, 20); a = b * ans; }
+                        else if (op === "*") { a = rand(1, 99); b = rand(1, 9); ans = a * b; }
+                        else { b = rand(1, 9); ans = rand(2, 20); a = b * ans; }
                         break;
                 }
                 const text = `${p} had ${a} ${o}s ${op === "+" ? "and found" : op === "-" ? "and gave away" : op === "*" ? "arranged in" : "shared among"} ${b}${op === "*" ? " rows of" : ""}.`;
@@ -1095,8 +1094,17 @@
                     setPowerUpsVisibility(false);
                 } catch (e) { console.error('Quit error', e) }
             };
-            get("settingsButton").onclick = () => get("settingsPanel").style.display = "flex";
-            get("closeSettings").onclick = () => get("settingsPanel").style.display = "none";
+            get("settingsButton").onclick = () => {
+                const panel = get("settingsPanel");
+                panel.style.display = "flex";
+                panel.style.opacity = "0";
+                setTimeout(() => panel.style.opacity = "1", 10);
+            };
+            get("closeSettings").onclick = () => {
+                const panel = get("settingsPanel");
+                panel.style.opacity = "0";
+                setTimeout(() => panel.style.display = "none", 300);
+            };
             const feedbackBtn = get('feedbackBtn');
             const feedbackModal = get('feedbackModal');
             const feedbackName = get('feedbackName');
@@ -1257,4 +1265,5 @@
         })();
     </script>
 </body>
+
 </html>
