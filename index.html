@@ -54,6 +54,8 @@
             top: 0;
             left: 0;
             z-index: 10;
+            opacity: 1;
+            transition: opacity 0.25s ease-in-out;
         }
 
         #logo {
@@ -181,7 +183,7 @@
             align-items: center;
             visibility: hidden;
             opacity: 0;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.25s ease-in-out;
         }
 
         #diffPopup.show {
@@ -1090,7 +1092,10 @@
                 try {
                     if (timer) { clearInterval(timer); timer = null; }
                     gameWrapper.style.display = "none";
-                    get("startScreen").style.display = "flex";
+                    const screen = get("startScreen");
+                    screen.style.display = "flex";
+                    screen.style.opacity = "0";
+                    setTimeout(() => screen.style.opacity = "1", 10);
                     setPowerUpsVisibility(false);
                 } catch (e) { console.error('Quit error', e) }
             };
@@ -1104,6 +1109,15 @@
                 const panel = get("settingsPanel");
                 panel.style.opacity = "0";
                 setTimeout(() => panel.style.display = "none", 300);
+            };
+            get("startButton").onclick = () => {
+                const screen = get("startScreen");
+                screen.style.opacity = "0";
+                setTimeout(() => {
+                    screen.style.display = "none";
+                    get("diffPopup").classList.add("show");
+                    setPowerUpsVisibility(false);
+                }, 250);
             };
             const feedbackBtn = get('feedbackBtn');
             const feedbackModal = get('feedbackModal');
@@ -1158,7 +1172,10 @@
             get("quitBtn").onclick = () => {
                 closeAppOrFallback(() => {
                     get("settingsPanel").style.display = "none";
-                    get("startScreen").style.display = "flex";
+                    const screen = get("startScreen");
+                    screen.style.display = "flex";
+                    screen.style.opacity = "0";
+                    setTimeout(() => screen.style.opacity = "1", 10);
                     gameWrapper.style.display = "none";
                     if (timer) { clearInterval(timer); timer = null; }
                     setPowerUpsVisibility(false);
@@ -1181,7 +1198,10 @@
                     hidePopup();
                     if (timer) { clearInterval(timer); timer = null; }
                     gameWrapper.style.display = "none";
-                    get("startScreen").style.display = "flex";
+                    const screen = get("startScreen");
+                    screen.style.display = "flex";
+                    screen.style.opacity = "0";
+                    setTimeout(() => screen.style.opacity = "1", 10);
                     setPowerUpsVisibility(false);
                 } catch (e) { console.error('Popup quit error', e) }
             };
