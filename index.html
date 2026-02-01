@@ -780,7 +780,9 @@
                         else { b = rand(1, 9); ans = rand(2, 20); a = b * ans; }
                         break;
                 }
-                const text = `${p} had ${a} ${o}s ${op === "+" ? "and found" : op === "-" ? "and gave away" : op === "*" ? "arranged in" : "shared among"} ${b}${op === "*" ? " rows of" : ""}.`;
+                const questions = ["How many now?", "How many in total?", "What's the total?", "How many does he/she have?"];
+                const question = questions[rand(0, questions.length - 1)];
+                const text = `${p} had ${a} ${o}s ${op === "+" ? "and found" : op === "-" ? "and gave away" : op === "*" ? "arranged in" : "shared among"} ${b}${op === "*" ? " rows of" : ""}. ${question}`;
                 return { text, answer: ans };
             }
 
