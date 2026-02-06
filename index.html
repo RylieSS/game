@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html always ake sure iflang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Math Blast Puzzle – Word Edition</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#222222">
+    <style>
+        /* Styles remain the same, as provided previously */
+        * {
+            box-sizing: border-box
+        }
+
+        @font-face {
+            font-family: 'Bright Chalk';
+            src: url('Bright Chalk.ttf') format('truetype');
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        /* Prevent mobile overscroll and make touch interactions more game-like */
+        html,
+        body {
+            overscroll-behavior-y: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Bright Chalk', sans-serif;
+            user-select: none;
+            background: url("board.jpg") center/cover no-repeat;
+            color: #fff;
+        }
+
+        #startScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            background-color: rgba(0, 0, 0, 0.8);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        #logo {
+            width: 300px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
+            transition: transform .25s;
+        }
+
+        #logo:hover {
+            transform: scale(1.03)
+        }
+
+        button {
+            font-family: 'Bright Chalk', sans-serif;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform .12s, background-color .12s;
+        }
+
+        button:active {
+            transform: scale(.98);
+        }
+
+        #startButton {
+            background: #4caf50;
+            color: #fff;
+            padding: 14px 30px;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        #startButton:hover {
+            background: #367c39;
+        }
+
+        #settingsButton {
+            background: #3498db;
+            color: #fff;
+            padding: 12px 26px;
+            font-size: 1.2rem;
+        }
+
+        #settingsButton:hover {
+            background: #2c80ba;
+        }
+
+        #tutorialButton {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 15;
+            background: #9b59b6;
+            color: #fff;
+            padding: 12px 20px;
+            font-size: 1.4rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: background-color .15s ease, transform .1s ease;
+        }
+
+        #tutorialButton:hover {
+            background: #8e44ad;
+            transform: scale(1.05);
+        }
+
+        #settingsPanel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+        }
+
+        .settingsContent {
+            background: #222;
+            color: #fff;
+            padding: 22px 28px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .settingsContent h2 {
+            color: #f1c40f;
+            margin: 0 0 10px 0
+        }
+
+        #settingsButtons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #settingsButtons button {
+            background: #4caf50;
+            color: #fff;
+            padding: 10px 18px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color .15s ease, transform .1s ease;
+        }
+
+        #settingsButtons button:hover {
+            background: #45a049;
+            transform: scale(1.03);
+        }
+
+        #closeSettings {
+            margin-top: 14px;
+            padding: 10px 18px;
+            font-size: 1rem;
+            border-radius: 8px;
+            color: #fff;
+            background: #3498db;
+        }
+
+        #closeSettings:hover {
+            background: #2c80ba;
+        }
+
+        /* Tutorial Modal (removed) */
+        #diffPopup {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 40;
+            background: transparent;
+            padding: 8px;
+            border-radius: 12px;
+            display: none;
+            gap: 12px;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        #diffPopup.show {
+            display: flex;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        #diffPopup button {
+            background: #4caf50;
+            color: #fff;
+            padding: 12px 22px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+        }
+
+        #diffPopup button:hover {
+            background: #367c39;
+        }
+
+        #gameWrapper {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            width: 90vw;
+            max-width: 520px;
+            text-align: center;
+            position: relative;
+        }
+
+        #quitGameBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color .2s ease, transform .1s ease;
+            z-index: 15;
+        }
+
+        #quitGameBtn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        #level,
+        #timer,
+        #score {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        #level {
+            color: #2ecc71
+        }
+
+        #timer {
+            color: #f1c40f
+        }
+
+        #score {
+            color: #ff66ff
+        }
+
+        #problemText {
+            font-size: 1.4rem;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.28);
+            padding: 10px 14px;
+            border-radius: 10px;
+            max-width: 92%;
+        }
+
+        #gameContainer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            width: 90vw;
+            max-width: 400px;
+            aspect-ratio: 1;
+        }
+
+        .cell {
+            border-radius: 6px;
+            width: 100%;
+            height: 100%;
+            transition: background .18s, transform .12s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .cell.filled {
+            background: var(--color);
+            box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.12), 0 3px 6px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 0, 0, 0.25);
+        }
+
+        .cell.hole {
+            background: rgba(0, 0, 0, 0.35);
+            border: 2px dashed rgba(255, 255, 255, 0.45);
+        }
+
+        .cell.sparkle {
+            position: relative;
+            overflow: visible
+        }
+
+        .cell.sparkle::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 120%;
+            height: 120%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 8%, rgba(255, 255, 255, 0.0) 40%);
+            pointer-events: none;
+            animation: sparkleAnim 520ms ease-out forwards
+        }
+
+        @keyframes sparkleAnim {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+                opacity: 0.9
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0
+            }
+        }
+
+        .star-particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 20px;
+            line-height: 1;
+            transform: translate(0, 0) scale(1);
+            will-change: transform, opacity, filter;
+            opacity: 1;
+            text-shadow: 0 0 6px rgba(255, 240, 200, 0.9);
+            z-index: 999
+        }
+
+        @keyframes starPopAnim {
+            0% {
+                transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+                opacity: 1
+            }
+
+            40% {
+                transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(1.05) rotate(var(--rot, 0deg));
+                opacity: 1
+            }
+
+            100% {
+                transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(0.9) rotate(calc(var(--rot, 0deg) + 45deg));
+                opacity: 0
+            }
+        }
+
+        #blockChoices {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px
+        }
+
+        .choice {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: grab;
+            background: none;
+            padding: 8px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .choice:hover {
+            transform: scale(1.05);
+        }
+
+        .choice.selected {
+            outline: 3px solid rgba(255, 255, 255, 0.18);
+            transform: scale(1.06)
+        }
+
+        .choice.selected {
+            outline: 3px solid rgba(255, 255, 255, 0.18);
+            transform: scale(1.06)
+        }
+
+        .shapeGrid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            width: 72px;
+        }
+
+        .blockCell {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            background: transparent;
+        }
+
+        .filledCell {
+            background: var(--color);
+            box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.12), 0 2px 4px rgba(0, 0, 0, 0.35);
+        }
+
+        .numberLabel {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+            margin-top: 6px;
+        }
+
+        #message {
+            font-size: 1.12rem;
+            min-height: 1.2em;
+            margin-top: 6px
+        }
+
+        /* Power-ups */
+        #powerUpsContainer {
+            position: fixed;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 30;
+            visibility: hidden;
+        }
+
+        .powerUp {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            color: #fff;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 8px;
+            background: #3b3d46;
+            transition: 0.18s;
+            position: relative;
+            opacity: 0.95;
+            padding: 6px;
+            text-align: center;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .powerUp .icon {
+            font-size: 20px;
+            line-height: 1
+        }
+
+        .powerUp .label {
+            font-size: 10px;
+            margin-top: 6px;
+            display: block
+        }
+
+        .powerUp .icon {
+            margin-right: 6px;
+        }
+
+        .powerUp.active {
+            box-shadow: 0 0 18px 6px rgba(255, 255, 255, 0.55);
+            transform: scale(1.03);
+            opacity: 1
+        }
+
+        .powerUp.used {
+            opacity: 0.35;
+            pointer-events: none;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Level End */
+        #levelEndPopup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        #levelEndPopup .popup-content {
+            background: #222;
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        #levelEndPopup .popup-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 14px;
+            justify-content: center;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #levelEndPopup button {
+            background: #4caf50;
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.18s ease, transform 0.12s;
+            width: 100%;
+        }
+
+        #levelEndPopup button:hover {
+            background: #367c39;
+        }
+
+        /* Responsive: move power-ups to bottom on narrow screens to avoid overlap */
+        @media (max-width: 600px) {
+
+            /* Keep power-ups on the right as a slim vertical column on phones */
+            #powerUpsContainer {
+                position: fixed;
+                right: 8px;
+                top: 16%;
+                transform: none;
+                flex-direction: column;
+                gap: 8px;
+                z-index: 40;
+                align-items: center;
+                visibility: visible;
+                max-height: 70vh;
+                overflow: auto;
+                padding: 4px;
+            }
+
+            .powerUp {
+                width: 56px;
+                height: 56px;
+                border-radius: 50%;
+                font-size: 0.78rem;
+                padding: 6px;
+                white-space: nowrap
+            }
+
+            /* Make room on the right so the power-ups don't overlap the game */
+            #gameWrapper {
+                padding-right: 96px;
+            }
+
+            #gameContainer {
+                max-width: calc(86vw - 96px);
+                width: calc(86vw - 96px);
+            }
+
+            /* full-screen mobile layout */
+            #gameWrapper {
+                position: fixed;
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                margin: 0;
+                height: 100vh;
+                justify-content: flex-start;
+                padding: 18px 16px 20px;
+                overflow: hidden
+            }
+
+            #blockChoices {
+                margin-top: 12px;
+                display: flex;
+                justify-content: center;
+                gap: 12px
+            }
+
+            .choice {
+                padding: 12px
+            }
+
+            .numberLabel {
+                font-size: 1.1rem
+            }
+
+            #problemText {
+                font-size: 1.2rem;
+                padding: 12px
+            }
+
+            button {
+                touch-action: manipulation
+            }
+        }
+
+        /* popup animation */
+        @keyframes popupIn {
+            0% {
+                transform: translateY(-8px) scale(.98);
+                opacity: 0
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1
+            }
+        }
+
+        #levelEndPopup .popup-content {
+            transform-origin: center center
+        }
+
+        #levelEndPopup.visible .popup-content {
+            animation: popupIn 260ms cubic-bezier(.2, .9, .28, 1) forwards
+        }
+
+        /* Loading Screen (removed) */
+
+        /* Credits modal (removed) */
+    </style>
+</head>
+
+<body>
+
+    <div id="startScreen">
+        <img id="logo" src="logo.png" alt="Math Blast Logo">
+        <button id="startButton">Start Game</button>
+        <button id="settingsButton">Settings</button>
+    </div>
+
+    <!-- tutorial button removed -->
+
+    <div id="diffPopup">
+        <button id="easyBtn">Easy</button>
+        <button id="mediumBtn">Medium</button>
+        <button id="hardBtn">Hard</button>
+    </div>
+
+    <div id="settingsPanel">
+        <div class="settingsContent">
+            <h2>Settings</h2>
+            <div id="settingsButtons">
+                <button id="bgMusicToggle">Background: ON</button>
+                <button id="feedbackBtn">Feedback</button>
+                <button id="quitBtn">Quit</button>
+            </div>
+            <button id="closeSettings">Close</button>
+        </div>
+    </div>
+
+    <!-- tutorial modal removed -->
+
+    <div id="gameWrapper">
+        <button id="quitGameBtn">Quit</button>
+        <div id="level">Level: 1</div>
+        <div id="timer">Time:30sec</div>
+        <div id="score">Score: 0</div>
+        <div id="problemText">Loading problem...</div>
+        <div id="gameContainer"></div>
+        <div id="blockChoices"></div>
+        <div id="message"></div>
+    </div>
+
+    <div id="powerUpsContainer">
+        <div class="powerUp" id="pu-skip" data-powerup="skip"><span class="icon">⏭</span>SKIP</div>
+        <div class="powerUp" id="pu-minus1" data-powerup="minus1"><span class="icon">❌</span>-1 Answer</div>
+        <div class="powerUp" id="pu-shield" data-powerup="shield"><span class="icon">🛡</span>Shield</div>
+        <div class="powerUp" id="pu-plus10" data-powerup="plus10"><span class="icon">⏱</span>+10s</div>
+        <div class="powerUp" id="pu-refresh" data-powerup="refresh"><span class="icon">🔄</span>Refresh</div>
+        <div class="powerUp" id="pu-double" data-powerup="double"><span class="icon">✨</span>2× Points</div>
+    </div>
+
+    <div id="levelEndPopup">
+        <div class="popup-content">
+            <h2 id="popupMessage">Level Complete!</h2>
+            <div class="popup-buttons">
+                <button id="continueBtn">Continue</button>
+                <button id="changeDiffBtn">Change Difficulty</button>
+                <button id="quitMainBtn">Quit to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback modal -->
+    <div id="feedbackModal"
+        style="display:none;position:fixed;inset:0;z-index:60;justify-content:center;align-items:center;background:rgba(0,0,0,0.6);">
+        <div
+            style="background:#222;color:#fff;padding:18px;border-radius:10px;max-width:520px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,0.6);">
+            <h3 style="margin-top:0;">Send Feedback</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <input id="feedbackName" placeholder="Your name (optional)"
+                    style="padding:8px;border-radius:6px;border:1px solid #444;background:#111;color:#fff;" />
+                <textarea id="feedbackText"
+                    placeholder="Thank You For Playing the game We Would Like To Know Your Opinion About Our Game..."
+                    rows="6"
+                    style="padding:8px;border-radius:6px;border:1px solid #444;background:#111;color:#fff;resize:vertical;"></textarea>
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button id="sendFeedback"
+                        style="background:#4caf50;color:#fff;padding:8px 12px;border-radius:8px;border:none;">Send</button>
+                    <button id="cancelFeedback"
+                        style="background:#ccc;color:#000;padding:8px 12px;border-radius:8px;border:none;">Cancel</button>
+                </div>
+                <div id="feedbackStatus" style="color:#f1c40f;font-size:0.9rem;display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- credits modal removed -->
+
+    <audio id="bgMusic" src="sugar-rush-1000-og-remix.mp3" loop preload="auto"></audio>
+
+    <script>
+        (() => {
+            const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+            const colors = ["#e74c3c", "#3498db", "#f1c40f", "#9b59b6", "#1abc9c", "#e67e22", "#2ecc71"];
+            const SHAPES = [[1, 1, 1, 1, 0, 0, 0, 0, 0], [1, 1, 0, 1, 1, 0, 0, 0, 0], [1, 1, 1, 0, 1, 0, 0, 0, 0], [0, 1, 0, 1, 1, 1, 0, 0, 0]];
+            const NAMES = ["Liam", "Olivia", "Noah", "Emma", "Mason", "Ava", "Ethan", "Sophia"];
+            const OBJECTS = ["apple", "book", "coin", "ball", "pencil", "cookie", "toy"];
+            const get = id => document.getElementById(id);
+
+
+            const baseTimes = { easy: 15, medium: 25, hard: 35 };
+            let level = 0, score = 0, time = baseTimes.easy, timer = null, difficulty = "easy";
+            let correct = null, lastShape = null, lastColor = null;
+            let doubleActive = false, shieldActive = false, shieldCooldown = false, levelInProgress = false;
+            let lastPowerUpScore = 0;
+
+
+            const popupIntervals = { easy: 10, medium: 10, hard: 10 };
+            const levelEndIntervals = { easy: 10, medium: 10, hard: 10 };
+
+            const levelCaps = { easy: 10, medium: 10, hard: 10 };
+
+
+            const gameWrapper = get("gameWrapper"),
+                gameContainer = get("gameContainer"),
+                blockChoices = get("blockChoices"),
+                messageEl = get("message"),
+                timerEl = get("timer"),
+                levelEl = get("level"),
+                scoreEl = get("score"),
+                problemText = get("problemText"),
+                popup = get("levelEndPopup"),
+                popupMsg = get("popupMessage"),
+                bgMusic = get("bgMusic"),
+                powerUpsContainer = get("powerUpsContainer");
+
+            // persistent background music preference
+            let bgMusicEnabled = (localStorage.getItem('bgMusicEnabled') === null) ? false : (localStorage.getItem('bgMusicEnabled') === 'true');
+            let musicPlaying = !!bgMusicEnabled;
+            try { if (bgMusic) bgMusic.muted = !musicPlaying; } catch (e) { }
+            try { if (get("bgMusicToggle")) get("bgMusicToggle").textContent = musicPlaying ? "Background: ON" : "Background: OFF"; } catch (e) { }
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+
+            // Loading screen logic removed
+
+            function startMusic() {
+                try {
+                    bgMusic.muted = false;
+                    bgMusic.volume = 0.7;
+                    bgMusic.play().then(() => {
+                        musicPlaying = true;
+                        get("bgMusicToggle").textContent = "Background: ON";
+                    }).catch(err => console.warn('Music playback error:', err));
+                } catch (e) {
+                    console.error('Music start error:', e);
+                }
+            }
+
+            // loading screen removed; no hide call
+
+
+
+            function generateProblem() {
+                const ops = ["+", "-", "*", "/"];
+                let op = ops[rand(0, ops.length - 1)];
+                const p = NAMES[rand(0, NAMES.length - 1)], o = OBJECTS[rand(0, OBJECTS.length - 1)];
+                let a, b, ans;
+                switch (difficulty) {
+                    case "easy": op = ["+", "-"][rand(0, 1)];
+                        if (op === "+") { a = rand(1, 9); b = rand(1, 9); ans = a + b; }
+                        else {
+                            a = rand(2, 9); b = rand(1, a - 1); ans = a - b;
+                        }
+                        break;
+                    case "medium": op = ops[rand(0, 3)];
+                        if (op === "+" || op === "-") {
+                            if (op === "+") { a = rand(10, 99); b = rand(10, 99); ans = a + b; }
+                            else { a = rand(11, 99); b = rand(10, a - 1); ans = a - b; }
+                        }
+                        else if (op === "*") { a = rand(2, 9); b = rand(2, 9); ans = a * b; }
+                        else { b = rand(2, 9); ans = rand(2, 9); a = b * ans; }
+                        break;
+                    case "hard": op = ops[rand(0, 3)];
+                        if (op === "+" || op === "-") {
+                            if (op === "+") { a = rand(100, 999); b = rand(100, 999); ans = a + b; }
+                            else { a = rand(101, 999); b = rand(100, a - 1); ans = a - b; }
+                        }
+                        else if (op === "*") { a = rand(10, 99); b = rand(10, 99); ans = a * b; }
+                        else { b = rand(10, 99); ans = rand(2, 20); a = b * ans; }
+                        break;
+                }
+                const text = `${p} had ${a} ${o}s ${op === "+" ? "and found" : op === "-" ? "and gave away" : op === "*" ? "arranged in" : "shared among"} ${b}${op === "*" ? " rows of" : ""}.`;
+                return { text, answer: ans };
+            }
+
+
+            function startTimer() {
+                if (timer) { clearInterval(timer); timer = null; }
+                if (typeof time !== "number") time = (baseTimes[difficulty] || 15);
+                timerEl.textContent = `Time: ${time}s`;
+                timer = setInterval(() => {
+                    time--;
+                    timerEl.textContent = `Time: ${time}s`;
+                    if (time <= 0) {
+                        clearInterval(timer); timer = null;
+
+                        handleAnswer(false, true);
+                    }
+                }, 1000);
+                console.log("startTimer: started", { time });
+            }
+
+
+            function initGrid() {
+                gameContainer.innerHTML = "";
+                lastColor = colors[rand(0, colors.length - 1)];
+                const shape = SHAPES[rand(0, SHAPES.length - 1)];
+                lastShape = shape;
+                const grid = Array(16).fill(true);
+                const sr = rand(0, 1), sc = rand(0, 1);
+                shape.forEach((v, i) => {
+                    if (v) {
+                        let r = sr + Math.floor(i / 3), c = sc + i % 3;
+                        if (r < 4 && c < 4) grid[r * 4 + c] = false;
+                    }
+                });
+                grid.forEach(f => {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (f) { cell.classList.add('filled'); cell.style.setProperty('--color', lastColor); }
+                    else { cell.classList.add('hole'); }
+                    cell.ondragover = e => e.preventDefault();
+                    cell.ondrop = e => {
+                        e.preventDefault();
+                        const isCorrect = e.dataTransfer.getData('correct') === 'true';
+                        handleAnswer(isCorrect);
+                    };
+                    cell.addEventListener('touchend', function (e) {
+                        try { e.preventDefault(); if (window.__currentDrag !== undefined) { handleAnswer(window.__currentDrag); window.__currentDrag = undefined; } } catch (err) {/* ignore */ }
+                    }, { passive: false });
+                    // allow tap-to-drop when on touch devices and a choice was tapped
+                    cell.addEventListener('click', function (e) {
+                        try {
+                            if (window.__selectedChoice !== undefined) {
+                                handleAnswer(window.__selectedChoice);
+                                clearSelection();
+                            }
+                        } catch (err) {/* ignore */ }
+                    });
+                    gameContainer.appendChild(cell);
+                });
+                console.log('initGrid: created cells', gameContainer.children.length, 'lastColor', lastColor);
+            }
+
+
+            function nextLevel() {
+                console.log("nextLevel: entering", { level, levelInProgress, timer });
+
+                levelInProgress = false;
+
+                try { if (popup && popup.style) popup.style.display = "none"; } catch (e) { }
+
+                level++;
+                levelEl.textContent = `Level: ${level}`;
+
+                if (level === (levelCaps[difficulty])) {
+                    if (timer) { clearInterval(timer); timer = null; }
+                    popupMsg.textContent = `🎉 You've completed all ${levelCaps[difficulty]} ${difficulty} levels!`;
+                    popup.style.display = "flex";
+                    setTimeout(() => { try { popup.classList.add('visible'); } catch (e) { } }, 10);
+                    levelInProgress = true;
+                    console.log("nextLevel: reached cap", { level, difficulty });
+                    return;
+                }
+                const prob = generateProblem();
+                problemText.textContent = prob.text;
+                correct = prob.answer;
+                messageEl.textContent = "";
+
+                time = (baseTimes[difficulty] || 15);
+                initGrid();
+                setupChoices();
+
+                levelInProgress = false;
+                startTimer();
+                console.log("nextLevel: started", { level, time });
+            }
+
+            function setupChoices() {
+                blockChoices.innerHTML = "";
+                let arr = [{ num: correct, correct: true }];
+                while (arr.length < 3) {
+                    let fake = correct + rand(-5, 5);
+                    if (fake > 0 && !arr.find(x => x.num === fake)) arr.push({ num: fake, correct: false });
+                }
+                arr.sort(() => Math.random() - 0.5);
+                arr.forEach(c => {
+                    const div = document.createElement("div"); div.className = "choice"; div.draggable = !isTouchDevice;
+                    div.ondragstart = e => e.dataTransfer.setData("correct", String(c.correct));
+                    div.addEventListener('touchstart', function (e) { try { e.preventDefault(); window.__currentDrag = c.correct; } catch (err) { } }, { passive: false });
+                    div.addEventListener('touchend', function (e) { try { e.preventDefault(); const t = e.changedTouches && e.changedTouches[0]; if (t) { const el = document.elementFromPoint(t.clientX, t.clientY); const cell = el && el.closest && el.closest('.cell'); if (cell) { handleAnswer(window.__currentDrag); } } window.__currentDrag = undefined; } catch (err) { } }, { passive: false });
+                    // On touch devices a tap should submit immediately like native mobile games
+                    div.addEventListener('click', function (e) { try { if (isTouchDevice) { handleAnswer(c.correct); } else { selectChoiceEl(div, c.correct); } } catch (err) { } });
+                    const grid = document.createElement("div"); grid.className = "shapeGrid"; grid.style.setProperty("--color", lastColor);
+                    lastShape.forEach(v => { const d = document.createElement("div"); d.className = "blockCell"; if (v) d.classList.add("filledCell"); grid.appendChild(d); });
+                    const label = document.createElement("div"); label.className = "numberLabel"; label.textContent = c.num;
+                    div.append(grid, label); blockChoices.append(div);
+                });
+            }
+
+            function fillMissingBlocks() {
+                const cells = [...document.querySelectorAll("#gameContainer .cell")];
+                lastShape.forEach(v => {
+                    if (v) {
+                        const holeIndex = cells.findIndex(c => c.classList.contains("hole"));
+                        if (holeIndex !== -1) {
+                            const target = cells[holeIndex];
+                            target.classList.remove("hole");
+                            target.classList.add("filled");
+                            target.style.setProperty("--color", lastColor);
+                            // add sparkle effect when filling a block
+                            try {
+                                target.classList.add('sparkle');
+                                setTimeout(() => { target.classList.remove('sparkle'); }, 600);
+                            } catch (e) { }
+                            try { spawnStarParticles(target, lastColor, 6); } catch (e) { }
+                        }
+                    }
+                });
+            }
+
+            // spawn star particle burst centered on a target cell
+            function spawnStarParticles(targetEl, color, count) {
+                if (!targetEl || !targetEl.getBoundingClientRect) return;
+                const gw = gameWrapper.getBoundingClientRect();
+                const tr = targetEl.getBoundingClientRect();
+                const cx = tr.left - gw.left + tr.width / 2;
+                const cy = tr.top - gw.top + tr.height / 2;
+                const starChars = ['✦', '✶', '★', '✺', '✪'];
+                for (let i = 0; i < count; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'star-particle';
+                    const ch = starChars[Math.floor(Math.random() * starChars.length)];
+                    s.textContent = ch;
+                    // brighter color variants; prefer warm/yellowish highlights
+                    const colors = ['#fff9d6', '#fff4b8', '#fff1a8', '#fffcdf'];
+                    s.style.color = color || colors[Math.floor(Math.random() * colors.length)];
+                    const size = 14 + Math.floor(Math.random() * 14);
+                    s.style.fontSize = size + 'px';
+                    s.style.left = Math.round(cx) + 'px';
+                    s.style.top = Math.round(cy) + 'px';
+                    const rot = Math.floor(Math.random() * 360);
+                    // compute random radial target
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 20 + Math.random() * 52;
+                    const dx = Math.cos(angle) * dist;
+                    const dy = Math.sin(angle) * dist - (6 * Math.random());
+                    const duration = 420 + Math.floor(Math.random() * 260);
+                    // use CSS variables to make keyframe use dx/dy/rot
+                    s.style.setProperty('--dx', dx + 'px');
+                    s.style.setProperty('--dy', dy + 'px');
+                    s.style.setProperty('--rot', rot + 'deg');
+                    s.style.transform = 'translate(-50%,-50%) scale(0.45) rotate(0deg)';
+                    gameWrapper.appendChild(s);
+                    // prefer WA animation for smoothness
+                    try {
+                        s.animate([
+                            { transform: 'translate(-50%,-50%) scale(0.45) rotate(0deg)', opacity: 1 },
+                            { transform: `translate(${dx}px, ${dy}px) scale(1) rotate(${rot}deg)`, opacity: 0 }
+                        ], { duration, easing: 'cubic-bezier(.15,.8,.25,1)' });
+                    } catch (e) {
+                        // fallback to CSS animation using the keyframes defined
+                        s.style.animation = `starPopAnim ${duration}ms cubic-bezier(.15,.8,.25,1) forwards`;
+                    }
+                    setTimeout(() => { try { s.remove(); } catch (e) { } }, duration + 80);
+                }
+            }
+
+
+
+
+            function handleAnswer(isCorrect, force = false) {
+                console.log("handleAnswer called", { isCorrect, force, level, levelInProgress, timer });
+                if (levelInProgress && !force) { console.log("handleAnswer: ignored due to levelInProgress"); return; }
+                levelInProgress = true;
+                if (timer) { clearInterval(timer); timer = null; }
+
+                if (!isCorrect && shieldActive) {
+                    shieldActive = false;
+                    messageEl.textContent = "🛡 Shield Blocked Damage!";
+                    startTimer();
+                    levelInProgress = false;
+                    return;
+                }
+
+                if (isCorrect) {
+                    let points = 10;
+                    if (doubleActive) { points *= 2; doubleActive = false; }
+                    setScore(score + points);
+                    messageEl.textContent = "✅ Correct!";
+                    fillMissingBlocks();
+                } else {
+                    setScore(score - 5);
+                    messageEl.textContent = "❌ Wrong!";
+                }
+
+
+                setTimeout(() => {
+                    try {
+                        levelInProgress = false;
+                        nextLevel();
+                    } catch (e) { console.error("Error in level transition", e); }
+                }, 500);
+            }
+
+
+            function showPopup(levelNumber) {
+                let msg;
+                if (timer) { clearInterval(timer); timer = null; }
+                switch (difficulty) {
+                    case "easy": msg = `Level ${levelNumber} Complete! You're breezing through!`; break;
+                    case "medium": msg = `Level ${levelNumber} Complete! Keep up the pace!`; break;
+                    case "hard": msg = `Level ${levelNumber} Complete! Incredible effort!`; break;
+                }
+                popupMsg.textContent = msg;
+                popup.style.display = "flex";
+                setTimeout(() => { try { popup.classList.add('visible'); } catch (e) { } }, 10);
+                levelInProgress = true;
+            }
+
+            function hidePopup() {
+                try { popup.classList.remove('visible'); } catch (e) { }
+                setTimeout(() => { try { popup.style.display = "none"; levelInProgress = false; } catch (e) { } }, 220);
+            }
+
+            function setPowerUpsVisibility(visible) {
+                powerUpsContainer.style.visibility = visible ? "visible" : "hidden";
+            }
+
+            function resetPowerUps() {
+                lastPowerUpScore = 0;
+                Object.values(powerUps).forEach(pu => {
+                    if (pu && pu.el) { pu.el.classList.remove("active", "used"); pu.el.style.background = "#3b3d46"; }
+                });
+                updatePowerUps();
+            }
+
+            function setScore(newScore) {
+                score = Math.max(0, Math.floor(newScore));
+                scoreEl.textContent = `Score: ${score}`;
+                checkPowerUpThreshold(score);
+                updatePowerUps();
+            }
+
+            function closeAppOrFallback(fallback) {
+                try {
+                    window.open('', '_self');
+                    window.close();
+                } catch (e) { }
+                setTimeout(() => {
+                    try { if (typeof fallback === 'function') fallback(); } catch (e) { }
+                }, 250);
+            }
+
+            function clearSelection() {
+                window.__selectedChoice = undefined;
+                document.querySelectorAll('.choice.selected').forEach(el => el.classList.remove('selected'));
+            }
+            function selectChoiceEl(el, value) {
+                clearSelection();
+                if (el) el.classList.add('selected');
+                window.__selectedChoice = value;
+            }
+
+            get("startButton").onclick = () => {
+                // only start music if the user enabled it previously
+                if (musicPlaying) { try { startMusic(); } catch (e) { } }
+                else { try { if (bgMusic) { bgMusic.muted = true; bgMusic.pause(); } } catch (e) { } }
+                get("startScreen").style.display = "none";
+                get("diffPopup").classList.add("show");
+                setPowerUpsVisibility(false);
+            };
+
+            function startGameWith(d) {
+                difficulty = d;
+                get("diffPopup").classList.remove("show");
+                gameWrapper.style.display = "flex";
+                // Respect the user's music toggle: only play if already enabled
+                if (musicPlaying) { try { bgMusic.muted = false; bgMusic.play().catch(() => { }); } catch (e) { } }
+                else { try { bgMusic.muted = true; bgMusic.pause(); } catch (e) { } }
+                // reset power-ups when starting a new difficulty/game
+                try { resetPowerUps(); updatePowerUps(); } catch (e) { }
+                setPowerUpsVisibility(true);
+                level = 0;
+                setScore(0);
+                levelEl.textContent = `Level: ${level}`;
+                doubleActive = false;
+                shieldActive = false;
+                levelInProgress = false;
+                nextLevel();
+            }
+
+            get("easyBtn").onclick = () => startGameWith("easy");
+            get("mediumBtn").onclick = () => startGameWith("medium");
+            get("hardBtn").onclick = () => startGameWith("hard");
+
+            get("quitGameBtn").onclick = () => {
+                // In-game Quit: return to main menu instead of trying to close the tab
+                try {
+                    if (timer) { clearInterval(timer); timer = null; }
+                    gameWrapper.style.display = "none";
+                    get("startScreen").style.display = "flex";
+                    setPowerUpsVisibility(false);
+                } catch (e) { console.error('Quit error', e) }
+            };
+            get("settingsButton").onclick = () => get("settingsPanel").style.display = "flex";
+            get("closeSettings").onclick = () => get("settingsPanel").style.display = "none";
+
+            // tutorial modal handlers removed
+
+            const feedbackBtn = get('feedbackBtn');
+            const feedbackModal = get('feedbackModal');
+            const feedbackName = get('feedbackName');
+            const feedbackText = get('feedbackText');
+            const sendFeedbackBtn = get('sendFeedback');
+            const cancelFeedbackBtn = get('cancelFeedback');
+            const feedbackStatus = get('feedbackStatus');
+
+            function showFeedback() {
+                if (feedbackModal) { feedbackModal.style.display = 'flex'; feedbackText.value = ''; feedbackName.value = ''; feedbackStatus.style.display = 'none'; setTimeout(() => feedbackText.focus(), 80); }
+            }
+            function hideFeedback() { if (feedbackModal) feedbackModal.style.display = 'none'; }
+
+            if (feedbackBtn) feedbackBtn.onclick = () => { showFeedback(); };
+            if (cancelFeedbackBtn) cancelFeedbackBtn.onclick = () => hideFeedback();
+
+            // credits modal handlers removed
+
+            if (sendFeedbackBtn) {
+
+                const FORM_ENDPOINT = 'https://formspree.io/f/movgzypa';
+                sendFeedbackBtn.onclick = async () => {
+                    const name = (feedbackName && feedbackName.value) ? feedbackName.value.trim() : '';
+                    const msg = (feedbackText && feedbackText.value) ? feedbackText.value.trim() : '';
+                    if (!msg) { feedbackStatus.textContent = 'Please enter feedback before sending.'; feedbackStatus.style.display = 'block'; return; }
+                    feedbackStatus.style.display = 'block'; feedbackStatus.style.color = '#f1c40f'; feedbackStatus.textContent = 'Sending...'
+                    let stateStr = '';
+                    try { if (window.__game_debug && typeof window.__game_debug.getState === 'function') { stateStr = JSON.stringify(window.__game_debug.getState()); } } catch (e) { }
+                    const payload = { name: name || 'anonymous', message: msg, gameState: stateStr };
+                    try {
+                        const res = await fetch(FORM_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (res.ok) {
+                            feedbackStatus.style.color = '#2ecc71';
+                            feedbackStatus.textContent = 'Feedback sent — thank you!';
+                            setTimeout(() => { feedbackStatus.style.display = 'none'; hideFeedback(); feedbackStatus.style.color = '#f1c40f'; }, 1200);
+                        } else {
+                            const data = await res.json().catch(() => null);
+                            console.error('Formspree error', data);
+                            feedbackStatus.style.color = '#e74c3c';
+                            feedbackStatus.textContent = 'Send failed — please try again or use email.';
+                        }
+                    } catch (err) {
+                        console.error('Send error', err);
+                        feedbackStatus.style.color = '#e74c3c';
+                        feedbackStatus.textContent = 'Network error while sending feedback.';
+                    }
+                };
+            }
+            get("quitBtn").onclick = () => {
+                closeAppOrFallback(() => {
+                    get("settingsPanel").style.display = "none";
+                    get("startScreen").style.display = "flex";
+                    gameWrapper.style.display = "none";
+                    if (timer) { clearInterval(timer); timer = null; }
+                    setPowerUpsVisibility(false);
+                });
+            };
+            get("changeDiffBtn").onclick = () => {
+                hidePopup();
+                gameWrapper.style.display = "none";
+                get("diffPopup").classList.add("show");
+                setPowerUpsVisibility(false);
+            };
+            get("continueBtn").onclick = () => {
+                hidePopup();
+                setPowerUpsVisibility(true);
+                levelInProgress = false;
+                nextLevel();
+            };
+            get("quitMainBtn").onclick = () => {
+                // Popup Quit: return to main menu (don't attempt to close window)
+                try {
+                    hidePopup();
+                    if (timer) { clearInterval(timer); timer = null; }
+                    gameWrapper.style.display = "none";
+                    get("startScreen").style.display = "flex";
+                    setPowerUpsVisibility(false);
+                } catch (e) { console.error('Popup quit error', e) }
+            };
+
+
+            get("bgMusicToggle").onclick = () => {
+                if (musicPlaying) {
+                    try { if (bgMusic) { bgMusic.muted = true; bgMusic.pause(); } } catch (e) { }
+                    musicPlaying = false;
+                    bgMusicEnabled = false;
+                    get("bgMusicToggle").textContent = "Background: OFF";
+                } else {
+                    try { if (bgMusic) { bgMusic.muted = false; bgMusic.play().catch(() => { }); } } catch (e) { }
+                    musicPlaying = true;
+                    bgMusicEnabled = true;
+                    get("bgMusicToggle").textContent = "Background: ON";
+                }
+                try { localStorage.setItem('bgMusicEnabled', bgMusicEnabled ? 'true' : 'false'); } catch (e) { }
+            }
+
+
+            const powerUps = {
+                skip: { el: document.getElementById("pu-skip"), color: "#2ecc71", used: 0, action: () => { setScore(score + 10); nextLevel(); } },
+                minus1: {
+                    el: document.getElementById("pu-minus1"), color: "#f1c40f", used: 0, action: () => {
+                        const choices = [...document.querySelectorAll(".choice")];
+                        const wrong = choices.filter(c => c.querySelector(".numberLabel").textContent != String(correct));
+                        if (wrong.length > 0) {
+                            const remove = wrong[Math.floor(Math.random() * wrong.length)];
+                            remove.style.opacity = "0.3";
+                            remove.style.pointerEvents = "none";
+                        }
+                    }
+                },
+                shield: { el: document.getElementById("pu-shield"), color: "#3498db", used: 0, action: () => { shieldActive = true; messageEl.textContent = "🛡 Shield Activated!"; } },
+                plus10: { el: document.getElementById("pu-plus10"), color: "#e67e22", used: 0, action: () => { time += 10; timerEl.textContent = `Time: ${time}s`; } },
+                refresh: { el: document.getElementById("pu-refresh"), color: "#9b59b6", used: 0, action: () => { if (timer) { clearInterval(timer); timer = null; } nextLevel(); } },
+                double: { el: document.getElementById("pu-double"), color: "#e84393", used: 0, action: () => { doubleActive = true; messageEl.textContent = "✨ Double Points Activated!"; } }
+            };
+
+            // make power-up elements more touch-friendly by expanding hit area on mobile
+            Object.values(powerUps).forEach(pu => {
+                if (pu && pu.el) { pu.el.style.touchAction = 'manipulation'; pu.el.style.webkitTapHighlightColor = 'transparent'; pu.el.setAttribute('role', 'button'); pu.el.setAttribute('aria-label', pu.el.dataset.powerup || 'power-up'); }
+            });
+
+            function updatePowerUps() {
+                const anyActive = Object.values(powerUps).some(pu => pu.el && pu.el.classList.contains("active"));
+                if (anyActive) setPowerUpsVisibility(true);
+                Object.values(powerUps).forEach(pu => {
+                    if (!pu || !pu.el) return;
+                    if (pu.el.classList.contains("active")) {
+                        pu.el.style.background = pu.color;
+                        pu.el.classList.remove("used");
+                    } else {
+                        pu.el.style.background = "#3b3d46";
+                        pu.el.classList.remove("used");
+                    }
+                });
+            }
+
+            function checkPowerUpThreshold(currScore) {
+                if (currScore >= 30 && Math.floor(currScore / 30) > Math.floor(lastPowerUpScore / 30)) {
+                    const available = Object.values(powerUps).filter(pu => pu.el && !pu.el.classList.contains("active"));
+                    if (available.length > 0) {
+                        const chosen = available[Math.floor(Math.random() * available.length)];
+                        chosen.el.classList.add("active");
+                        chosen.el.style.background = chosen.color;
+                    }
+                    lastPowerUpScore = currScore;
+                }
+            }
+
+            Object.keys(powerUps).forEach(key => {
+                const pu = powerUps[key];
+                if (!pu || !pu.el) return;
+                pu.el.onclick = () => {
+                    try {
+                        if (pu.el.classList.contains("active")) {
+                            // execute the power-up action
+                            pu.action();
+                            // deactivate this power-up until player earns the next threshold
+                            pu.el.classList.remove("active");
+                            pu.el.style.background = "#3b3d46";
+                            // small visual feedback
+                            try { if (pu.el.animate) pu.el.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.96)' }, { transform: 'scale(1)' }], { duration: 180 }); } catch (e) { }
+                            updatePowerUps();
+                            // do NOT update lastPowerUpScore here; unlocking uses score progression
+                        }
+                    } catch (err) {
+                        console.error("Power-up error:", err);
+                    }
+                };
+            });
+
+
+            setPowerUpsVisibility(false);
+        })();
+    </script>
+
+</body>
+
+</html>
